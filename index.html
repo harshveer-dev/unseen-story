@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNSEEN HUMAN NATURE — Dark Stories Studio | Reels Production Suite</title>
+  <meta name="description" content="Production studio for UNSEEN HUMAN NATURE (@unseen_hummannature) by Harshveer Singh. Dark psychological storytelling for 9:16 Instagram Reels.">
+
+  <!-- Google Fonts: Cinzel (Cinematic Titles), Plus Jakarta Sans (UI), JetBrains Mono (Scripts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <div id="app">
+    <!-- TOP STUDIO HEADER -->
+    <header class="studio-header">
+      <div class="brand-block" onclick="UHN.App.switchTab('bible')">
+        <div class="brand-emblem" title="UNSEEN HUMAN NATURE">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-name">
+            UNSEEN HUMAN NATURE
+            <span class="brand-badge">@unseen_hummannature</span>
+          </div>
+          <div class="brand-tagline">You see the face. We question the person behind it.</div>
+        </div>
+      </div>
+
+      <!-- Active Series Switcher Pill -->
+      <div class="header-series-pill" id="headerSeriesPill" title="Click to switch or create series">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-red-light); flex-shrink:0">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <div style="display:flex; flex-direction:column; overflow:hidden">
+          <span class="series-pill-label">ACTIVE SERIES</span>
+          <span class="series-pill-title" id="headerSeriesTitle">WHO AM I?</span>
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); margin-left:auto">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" onclick="UHN.App.switchTab('story-processor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ingest Story
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="UHN.App.switchTab('export')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Center
+        </button>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="studio-nav-bar">
+      <button class="nav-tab-btn active" data-tab="bible">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Episode Bible
+      </button>
+
+      <button class="nav-tab-btn" data-tab="simulator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        9:16 Reel Simulator
+      </button>
+
+      <button class="nav-tab-btn" data-tab="voice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        Voice Studio
+      </button>
+
+      <button class="nav-tab-btn" data-tab="story-processor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Story Ingestion
+      </button>
+
+      <button class="nav-tab-btn" data-tab="characters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Character Bible & Moodboard
+      </button>
+
+      <button class="nav-tab-btn" data-tab="export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Center
+      </button>
+
+      <button class="nav-tab-btn" data-tab="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="studio-main-container">
+
+      <!-- ==================================================================
+           VIEW 1: EPISODE BIBLE
+           ================================================================== -->
+      <section class="studio-view active-view" id="view-bible">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>EPISODIC PRODUCTION BIBLE</h2>
+            <p id="headerSeriesCount">Master Series: WHO AM I? • 10 Episodes</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary btn-sm" onclick="UHN.App.switchTab('simulator')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Simulate Active Episode (9:16)
+            </button>
+          </div>
+        </div>
+
+        <div class="bible-layout">
+          <!-- Sidebar: Episodes List -->
+          <aside class="episode-sidebar">
+            <div class="sidebar-header">
+              <span class="sidebar-title">EPISODES</span>
+              <span class="badge badge-production" id="sidebarEpisodeCount">10 Parts</span>
+            </div>
+            <div class="episode-list" id="episodeSidebarList">
+              <!-- Dynamically populated -->
+            </div>
+            <div style="padding: 12px; border-top: 1px solid var(--border-subtle); background: var(--bg-surface)">
+              <button class="btn btn-secondary btn-sm" id="btnAddEpisode" style="width: 100%">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                + Add New Episode
+              </button>
+            </div>
+          </aside>
+
+          <!-- Main Episode Workspace -->
+          <div class="episode-workspace">
+            
+            <!-- Metadata Bar -->
+            <div class="card" style="margin-bottom:0">
+              <div class="grid-4" style="align-items: center">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Part Number</label>
+                  <input type="number" class="form-input mono" id="epNumberInput" min="1" max="50">
+                </div>
+                <div class="form-group" style="grid-column: span 2; margin-bottom:0">
+                  <label class="form-label">Episode Title</label>
+                  <input type="text" class="form-input" id="epTitleInput" style="font-family:var(--font-serif); font-weight:700">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Production Status</label>
+                  <select class="form-select" id="epStatusSelect">
+                    <option value="draft">Draft</option>
+                    <option value="review">Ready for Review</option>
+                    <option value="production">Ready for Production</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:14px; margin-bottom:0">
+                <label class="form-label">Thematic Arc / Conflict</label>
+                <input type="text" class="form-input" id="epThemeInput">
+              </div>
+            </div>
+
+            <!-- Live Metrics Strip -->
+            <div class="metrics-strip">
+              <div class="metric-card">
+                <span class="metric-lbl">Total Words</span>
+                <span class="metric-val" id="metricWordCount">0</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-lbl">Est. Spoken Duration</span>
+                <span class="metric-val" id="metricDuration">~0s</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-lbl">Speaking Pace</span>
+                <span class="metric-val" id="metricWpm">135 WPM</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-lbl">Reel Pace Status</span>
+                <div class="metric-indicator metric-safe" id="metricPaceIndicator">
+                  ✓ Safe Range (0–45s)
+                </div>
+              </div>
+            </div>
+
+            <!-- Narration Script Editor with Voice Markers -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                  NARRATION SCRIPT & PACING DIRECTIONS
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="UHN.App.switchTab('voice')">
+                  🎙 Open Teleprompter Studio
+                </button>
+              </div>
+
+              <div class="script-editor-wrapper">
+                <div class="voice-markers-toolbar" id="voiceMarkersToolbar">
+                  <!-- Voice markers injected via JS -->
+                </div>
+                <textarea class="form-textarea narration-script-area" id="epNarrationScript" placeholder="Write spoken voice-over script here... Use [PAUSE] or [WHISPER] buttons above to insert directions."></textarea>
+              </div>
+            </div>
+
+            <!-- Opening Hook Selector & 10 Alternatives -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  OPENING HOOK (FIRST 3 SECONDS)
+                </div>
+                <span class="badge badge-production">High-Retention Filter</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Active Primary Hook</label>
+                <input type="text" class="form-input" id="epOpeningHook" style="font-weight:600; color:#ffffff">
+              </div>
+
+              <label class="form-label" style="margin-top:14px; margin-bottom:8px">10 Psychological Category Alternatives (Click to Select)</label>
+              <div class="hook-grid" id="hooksAlternativeGrid">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Psychological Insight & Ethical Grounding -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  PSYCHOLOGICAL GROUNDING & ETHICAL ACCOUNTABILITY
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Core Psychological Truth</label>
+                <textarea class="form-textarea" id="epInsightText" style="min-height:75px"></textarea>
+              </div>
+              <div class="insight-disclaimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Editorial Policy: Explores vulnerability, silence, and emotional control honestly without glorifying manipulative tactics.</span>
+              </div>
+            </div>
+
+            <!-- Cinematic Visual & Sound Specifications -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                  CINEMATIC DIRECTING SPECIFICATIONS
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Visual Concept (Moody / Real)</label>
+                  <textarea class="form-textarea" id="epVisualDirections" style="min-height:80px"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">
+                    <span>On-Screen Text (Centered)</span>
+                    <span id="safeZoneBadge" class="badge badge-published">Safe</span>
+                  </label>
+                  <textarea class="form-textarea" id="epOnScreenText" style="min-height:80px"></textarea>
+                </div>
+              </div>
+
+              <div class="grid-2" style="margin-top:10px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Sound Design & Ambient SFX</label>
+                  <input type="text" class="form-input" id="epSoundDesign">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Scene Transition Cue</label>
+                  <input type="text" class="form-input" id="epTransitionInstructions">
+                </div>
+              </div>
+            </div>
+
+            <!-- 9:16 Visual Timeline -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  TIMESTAMPED 9:16 REEL TIMELINE & SHOT LIST
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnAddTimelineScene">
+                  + Add Scene
+                </button>
+              </div>
+
+              <div class="timeline-table-wrapper">
+                <table class="timeline-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 120px">Timestamp</th>
+                      <th>Visual Concept</th>
+                      <th>Camera Angle</th>
+                      <th>Overlay Text</th>
+                      <th>SFX Cue</th>
+                      <th style="width: 50px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="timelineTableBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Social Media Distribution Package -->
+            <div class="card" style="margin-bottom:0">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                  INSTAGRAM DISTRIBUTION & CAPTION PACK
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-bottom:12px">
+                <button class="btn btn-sm btn-secondary caption-tab-btn" data-caption="short">Short & Punchy</button>
+                <button class="btn btn-sm btn-primary caption-tab-btn active" data-caption="storytelling">Deep Storytelling</button>
+                <button class="btn btn-sm btn-secondary caption-tab-btn" data-caption="psychological">Psychological</button>
+              </div>
+
+              <div class="copy-box">
+                <button class="btn btn-sm btn-secondary copy-btn-absolute" id="btnCopyCaption">Copy Caption</button>
+                <div id="socialCaptionBox"></div>
+              </div>
+
+              <div class="grid-2">
+                <div>
+                  <label class="form-label">Comment Discussion Question</label>
+                  <div class="copy-box">
+                    <button class="btn btn-sm btn-secondary copy-btn-absolute" id="btnCopyQuestion">Copy</button>
+                    <div id="socialQuestionBox"></div>
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label">Call To Action (CTA)</label>
+                  <div class="copy-box">
+                    <button class="btn btn-sm btn-secondary copy-btn-absolute" id="btnCopyCTA">Copy</button>
+                    <div id="socialCtaBox"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:10px">
+                <label class="form-label">Optimized Hashtags</label>
+                <div class="copy-box">
+                  <button class="btn btn-sm btn-secondary copy-btn-absolute" id="btnCopyHashtags">Copy</button>
+                  <div id="socialHashtagsBox" class="mono"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone Action -->
+            <div style="display:flex; justify-content:flex-end; padding:10px 0">
+              <button class="btn btn-danger btn-sm" id="btnDeleteEpisode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete This Episode
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 2: 9:16 REEL SIMULATOR
+           ================================================================== -->
+      <section class="studio-view" id="view-simulator">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>9:16 REEL VISUAL SIMULATOR</h2>
+            <p id="simEpTitle">Simulating Active Episode</p>
+          </div>
+          <div style="display:flex; gap:10px">
+            <button class="btn btn-secondary btn-sm" id="btnSimToggleIG">Toggle Instagram UI</button>
+            <button class="btn btn-secondary btn-sm" id="btnSimToggleSafe">Toggle Safe Zones</button>
+          </div>
+        </div>
+
+        <div class="simulator-layout">
+          <!-- Smartphone 9:16 Viewport -->
+          <div class="simulator-phone-wrapper">
+            <div class="phone-mockup">
+              <!-- Speaker & Dynamic Island -->
+              <div class="phone-island">
+                <div class="phone-island-camera"></div>
+              </div>
+
+              <!-- Screen Area -->
+              <div class="phone-screen" id="simPhoneScreen">
+                <div class="sim-ambient-light"></div>
+
+                <!-- Centered Text Overlay -->
+                <div class="sim-overlay-text-wrapper">
+                  <div class="sim-overlay-pill" id="simPartPill">PART 01</div>
+                  <div class="sim-overlay-main-text" id="simOverlayText">
+                    WHO AM I?
+                  </div>
+                </div>
+
+                <!-- Real-time Subtitle Bar -->
+                <div class="sim-subtitles-bar" id="simSubtitleBar">
+                  "Har insaan ka ek chehra hota hai jo duniya dekhti hai..."
+                </div>
+
+                <!-- Instagram UI Overlay -->
+                <div class="sim-instagram-ui" id="simInstagramOverlay">
+                  <div class="sim-ig-top">
+                    <span style="font-size:12px; opacity:0.9">Reels</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+
+                  <!-- Right Action Buttons -->
+                  <div class="sim-ig-right">
+                    <div class="sim-ig-action-btn">
+                      <svg viewBox="0 0 24 24" fill="white" stroke="white"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      <span>54.2K</span>
+                    </div>
+                    <div class="sim-ig-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                      <span>1,842</span>
+                    </div>
+                    <div class="sim-ig-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      <span>12.4K</span>
+                    </div>
+                  </div>
+
+                  <!-- Bottom Profile Bar -->
+                  <div class="sim-ig-bottom">
+                    <div class="sim-ig-profile">
+                      <div class="sim-ig-avatar">U</div>
+                      <span class="sim-ig-username" id="simIgUsername">@unseen_hummannature</span>
+                      <span class="sim-ig-follow-btn">Follow</span>
+                    </div>
+                    <div class="sim-ig-caption" id="simIgCaption">
+                      Part 01 of WHO AM I?...
+                    </div>
+                    <div style="font-size:10px; color:#d4d4d8; display:flex; align-items:center; gap:4px">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                      <span>Unseen Human Nature • Original Audio</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Safe Zones Overlay Layer (Hidden by default) -->
+                <div class="sim-safe-overlay" id="simSafeZoneOverlay" style="display:none">
+                  <div class="safe-zone-top">Top Safe Margin (Avoid Overlays)</div>
+                  <div class="safe-zone-right"></div>
+                  <div class="safe-zone-bottom">Bottom Caption & Audio Safe Margin</div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulator Scrubber & Directing Feed -->
+          <div class="sim-controls-panel">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              PLAYBACK & TIMELINE SCRUBBER
+            </div>
+
+            <!-- Scrubber Slider -->
+            <div class="scrubber-wrapper">
+              <input type="range" class="scrubber-slider" id="simScrubber" min="0" max="45" value="0">
+              <div class="scrubber-meta">
+                <span id="simCurrentTime">00:00</span>
+                <span id="simMaxDuration">00:45</span>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:center">
+              <button class="btn btn-primary" id="btnSimPlay">
+                <span>▶ Play Timeline</span>
+              </button>
+              <button class="btn btn-secondary" id="btnSimReset">
+                Reset
+              </button>
+              <button class="btn btn-secondary" id="btnSimVoicePreview">
+                <span>▶ Listen to Narration Audio</span>
+              </button>
+            </div>
+
+            <div class="card" style="margin-top:10px; margin-bottom:0">
+              <div class="form-label" style="margin-bottom:6px">Active Scene Directing Notes</div>
+              <div id="simActiveVisualNote" style="font-size:12.5px; color:#e4e4e7; line-height:1.5">
+                Camera: Slow push in • Visual: Macro close up of eyes • SFX: Subtle sub-bass
+              </div>
+            </div>
+
+            <div>
+              <div class="form-label" style="margin-bottom:8px">Episode Scene Sequence</div>
+              <div id="simSceneTimelineList" style="max-height: 240px; overflow-y: auto">
+                <!-- Scenes list -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 3: VOICE-OVER STUDIO & TELEPROMPTER
+           ================================================================== -->
+      <section class="studio-view" id="view-voice">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>VOICE-OVER STUDIO & TELEPROMPTER</h2>
+            <p id="voiceStudioEpTitle">Live Recording Prompter with Speech Engine</p>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center">
+            <button class="btn btn-primary" id="btnVoicePlay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Play Voice Preview
+            </button>
+            <button class="btn btn-secondary" id="btnVoicePause">
+              Pause
+            </button>
+            <button class="btn btn-secondary" id="btnVoiceStop">
+              Stop
+            </button>
+          </div>
+        </div>
+
+        <div class="voice-studio-layout">
+          <!-- Voice Controls Bar -->
+          <div class="card" style="margin-bottom:0">
+            <div class="grid-4" style="align-items:center">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Narrator Voice</label>
+                <select class="form-select" id="voiceSelectDropdown">
+                  <!-- Populated via Web Speech API -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">
+                  <span>Pacing Speed (WPM)</span>
+                  <span id="voiceWpmDisplay" style="color:#ffffff; font-weight:700">135 WPM</span>
+                </label>
+                <input type="range" class="scrubber-slider" id="voiceWpmSlider" min="100" max="180" value="135">
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Prompter Font Size</label>
+                <div style="display:flex; gap:6px">
+                  <button class="btn btn-secondary btn-sm" id="btnVoiceFontMinus">A- Smaller</button>
+                  <button class="btn btn-secondary btn-sm" id="btnVoiceFontPlus">A+ Larger</button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Pacing Reference</label>
+                <div style="font-size:12px; color:#a1a1aa">
+                  Target: ~135 WPM (Optimal for dark psychological cadence)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prompter Screen -->
+          <div class="teleprompter-box" id="teleprompterContent">
+            <!-- Teleprompter lines injected via JS -->
+          </div>
+
+          <div class="insight-disclaimer" style="justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Tip: Click any sentence in the teleprompter to highlight and focus your recording position.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 4: STORY INGESTION & ARC GENERATOR
+           ================================================================== -->
+      <section class="studio-view" id="view-story-processor">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>STORY INGESTION & AI ARC PROCESSOR</h2>
+            <p>Transform any raw Hindi, Hinglish, or English story into a complete multi-part Instagram Reels production series.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnLoadSampleStory">
+            Load Sample Story
+          </button>
+        </div>
+
+        <div style="max-width: 960px; margin: 0 auto; display:flex; flex-direction:column; gap:20px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">1. PASTE YOUR RAW STORY OR CONCEPT</div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Story / Series Title</label>
+              <input type="text" class="form-input" id="ingestTitle" placeholder="e.g. THE SILENT OBSERVER" value="THE SILENT OBSERVER">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Raw Narrative Story Text (Hindi / Hinglish / English)</label>
+              <textarea class="form-textarea" id="ingestRawStory" style="min-height: 160px" placeholder="Paste your story here... It can be a personal experience, psychological case, fictional drama, or Reddit story."></textarea>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">2. CINEMATIC PRODUCTION PARAMETERS</div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Psychological Category</label>
+                <select class="form-select" id="ingestCategory"></select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Narration Delivery Style</label>
+                <select class="form-select" id="ingestNarrationStyle"></select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Emotional Intensity</label>
+                <select class="form-select" id="ingestIntensity"></select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Ending Style</label>
+                <select class="form-select" id="ingestEndingStyle"></select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Target Duration per Episode</label>
+                <select class="form-select" id="ingestDuration">
+                  <option value="35">35 Seconds (Ultra Punchy)</option>
+                  <option value="45" selected>45 Seconds (Recommended Instagram Ideal)</option>
+                  <option value="60">60 Seconds (Deep Narrative)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Number of Episodes</label>
+                <select class="form-select" id="ingestEpisodeCount">
+                  <option value="auto" selected>Auto-detect from story length</option>
+                  <option value="3">3 Parts (Short Mini-Series)</option>
+                  <option value="5">5 Parts (Standard Arc)</option>
+                  <option value="7">7 Parts (Deep Dive)</option>
+                  <option value="10">10 Parts (Full Master Series)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Primary Language</label>
+                <select class="form-select" id="ingestLanguage">
+                  <option value="Hinglish" selected>Hinglish (Conversational)</option>
+                  <option value="Hindi">Hindi (Shuddh / Dramatic)</option>
+                  <option value="English">English</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top: 14px">
+              <button class="btn btn-primary btn-lg" id="btnTransformStory" style="width: 100%; padding: 14px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Transform Story into Multi-Part Production Series
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 5: CHARACTER BIBLE & MOODBOARD
+           ================================================================== -->
+      <section class="studio-view" id="view-characters">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>CHARACTER BIBLE & MOODBOARD</h2>
+            <p>Visual aesthetics, psychological traits, and recurring character anchors.</p>
+          </div>
+        </div>
+
+        <!-- Characters Grid -->
+        <div class="characters-grid" id="charactersListGrid">
+          <!-- Populated via JS -->
+        </div>
+
+        <!-- Character Moodboard Image Display -->
+        <div class="moodboard-wrapper">
+          <div class="card-header" style="margin-bottom:0">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              CINEMATIC CHARACTER MOODBOARD & VISUAL ANCHORS
+            </div>
+            <span class="badge badge-published">Production Asset</span>
+          </div>
+
+          <div class="moodboard-image-frame">
+            <img src="assets/character_moodboard.jpg" alt="Unseen Human Nature Character Moodboard">
+          </div>
+
+          <div style="font-size:12.5px; color:#a1a1aa; line-height:1.6">
+            <strong>Production Direction:</strong> Maintain high contrast, deep shadows, rainy night aesthetics, subdued neon reflections, and subtle facial micro-expressions. Keep wardrobe grounded (oversized hoodies, minimalist silver rings, dark knit sweaters).
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 6: EXPORT CENTER
+           ================================================================== -->
+      <section class="studio-view" id="view-export">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>PRODUCTION EXPORT CENTER</h2>
+            <p>One-click production bibles, teleprompter scripts, caption packages, and shot lists.</p>
+          </div>
+        </div>
+
+        <div class="export-grid">
+          <!-- 1. Full Production Bible (.md) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Series Production Bible (.md)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Complete markdown document containing source summary, character profiles, all episode narration scripts, visual timelines, and social packages.</p>
+            </div>
+            <button class="btn btn-primary" id="btnExportBibleMd">
+              Download Bible (.md)
+            </button>
+          </div>
+
+          <!-- 2. Single Episode Plan (.md) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Active Episode Plan (.md)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Targeted production sheet for the currently selected episode, including 9:16 shot list, hook choices, and caption options.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnExportEpisodeMd">
+              Download Active Part (.md)
+            </button>
+          </div>
+
+          <!-- 3. Teleprompter Scripts (.txt) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Teleprompter Narration (.txt)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Clean spoken scripts formatted for recording booths, teleprompter apps, or ElevenLabs / speech generators.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnExportScriptsTxt">
+              Download Scripts (.txt)
+            </button>
+          </div>
+
+          <!-- 4. Hook Database (.txt) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Complete Hook Database (.txt)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">All 10 psychological category hooks generated across every episode. Perfect for A/B testing and content calendars.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnExportHooksTxt">
+              Download Hooks (.txt)
+            </button>
+          </div>
+
+          <!-- 5. Instagram Caption Pack (.txt) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Instagram Caption Pack (.txt)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Short, Storytelling, and Psychological captions with discussion questions, CTAs, and hashtags for all parts.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnExportCaptionsTxt">
+              Download Captions (.txt)
+            </button>
+          </div>
+
+          <!-- 6. Director's Shot List (.txt) -->
+          <div class="export-card">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Director's Shot List (.txt)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Timestamped 9:16 visual breakdown, camera angles, on-screen text overlays, and sound cues for video editors.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnExportVisualsTxt">
+              Download Shot List (.txt)
+            </button>
+          </div>
+
+          <!-- 7. Full JSON Project Backup -->
+          <div class="export-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(20,20,26,0.9) 0%, rgba(30,10,12,0.5) 100%)">
+            <div>
+              <div class="export-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              </div>
+              <h3 style="font-size:16px; margin: 12px 0 6px 0">Complete Studio Backup & Migration (.json)</h3>
+              <p style="font-size:12px; color:var(--text-muted)">Export or restore all series, episodes, characters, and studio settings in one portable JSON archive.</p>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:14px">
+              <button class="btn btn-primary" id="btnExportBackupJson">
+                Export Studio Backup (.json)
+              </button>
+              <button class="btn btn-secondary" id="btnTriggerImport">
+                Import / Restore Backup (.json)
+              </button>
+              <input type="file" id="inputImportBackup" accept=".json" style="display:none">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 7: SETTINGS
+           ================================================================== -->
+      <section class="studio-view" id="view-settings">
+        <div class="view-header">
+          <div class="view-header-main">
+            <h2>STUDIO CONFIGURATION & BRAND SETTINGS</h2>
+            <p>Customize brand tags, narrator cadence, and persistence preferences.</p>
+          </div>
+        </div>
+
+        <div style="max-width: 680px; margin: 0 auto; display:flex; flex-direction:column; gap:20px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">BRAND & SOCIAL IDENTITY</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Brand Name</label>
+              <input type="text" class="form-input" id="settingBrandName">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Instagram Handle</label>
+              <input type="text" class="form-input" id="settingBrandHandle">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Brand Tagline</label>
+              <input type="text" class="form-input" id="settingBrandTagline">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Default Speaking Rate (WPM)</label>
+              <input type="number" class="form-input" id="settingWpm" min="100" max="200">
+              <div class="input-hint">Used for calculating reel duration from script word count.</div>
+            </div>
+
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" id="btnSaveSettings">
+                Save Settings
+              </button>
+            </div>
+          </div>
+
+          <div class="card" style="border-color: rgba(185, 28, 28, 0.3)">
+            <div class="card-header">
+              <div class="card-title" style="color: #f87171">RESET TO FACTORY DEFAULTS</div>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px">
+              Restores the default 10-episode Master Series "WHO AM I?" by Harshveer Singh and clears any accidental edits.
+            </p>
+            <button class="btn btn-danger btn-sm" id="btnResetDefaults">
+              Reset to Master Series "WHO AM I?"
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- SERIES SWITCHER MODAL -->
+  <div class="modal-backdrop" id="modalSeriesSwitcher">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">SERIES LIBRARY</div>
+        <button class="btn btn-ghost btn-sm" id="btnCloseSeriesModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalSeriesList">
+        <!-- Series list populated via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" id="btnModalNewSeries">
+          + Create New Blank Series
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="studio-toast" id="studioToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span>Notification message</span>
+  </div>
+
+  <!-- Application Scripts in Dependency Order -->
+  <script src="js/models.js"></script>
+  <script src="js/sample_data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/reel_planner.js"></script>
+  <script src="js/voice_studio.js"></script>
+  <script src="js/story_processor.js"></script>
+  <script src="js/export_center.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
