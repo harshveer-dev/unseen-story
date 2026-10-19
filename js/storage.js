@@ -7,19 +7,55 @@
 window.UHN = window.UHN || {};
 
 UHN.Storage = (function() {
-  const STORAGE_KEY_SERIES = "uhn_dark_studio_series_v1";
+  const STORAGE_KEY_SERIES = "uhn_dark_studio_series_v2";
   const STORAGE_KEY_ACTIVE = "uhn_dark_studio_active_id";
   const STORAGE_KEY_SETTINGS = "uhn_dark_studio_settings_v1";
 
   function init() {
     try {
-      const existing = localStorage.getItem(STORAGE_KEY_SERIES);
+      let existing = localStorage.getItem(STORAGE_KEY_SERIES);
+      if (!existing) {
+        // Check if v1 existed and migrate
+        const oldV1 = localStorage.getItem("uhn_dark_studio_series_v1");
+        if (oldV1) {
+          const parsed = JSON.parse(oldV1);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Upgrade characters in existing series
+            parsed.forEach(s => {
+              if (s.id === UHN.SampleData.MASTER_SERIES.id || !s.characters || s.characters.length === 0 || !s.characters[0].faceReference) {
+                s.characters = JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES.characters));
+              }
+            });
+            localStorage.setItem(STORAGE_KEY_SERIES, JSON.stringify(parsed));
+            existing = JSON.stringify(parsed);
+          }
+        }
+      }
+
       if (!existing || JSON.parse(existing).length === 0) {
         // Pre-populate with master series "WHO AM I?"
         const initialList = [JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES))];
         localStorage.setItem(STORAGE_KEY_SERIES, JSON.stringify(initialList));
         localStorage.setItem(STORAGE_KEY_ACTIVE, UHN.SampleData.MASTER_SERIES.id);
+      } else {
+        // Ensure active series has full characters and enriched scenes
+        const parsed = JSON.parse(existing);
+        let modified = false;
+        parsed.forEach(s => {
+          if (!s.characters || s.characters.length === 0 || !s.characters[0].faceReference) {
+            s.characters = JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES.characters));
+            modified = true;
+          }
+          if (s.id === UHN.SampleData.MASTER_SERIES.id && s.episodes && s.episodes[0] && s.episodes[0].timelinePlan && !s.episodes[0].timelinePlan[0].characterRef) {
+            s.episodes = JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES.episodes));
+            modified = true;
+          }
+        });
+        if (modified) {
+          localStorage.setItem(STORAGE_KEY_SERIES, JSON.stringify(parsed));
+        }
       }
+
       if (!localStorage.getItem(STORAGE_KEY_SETTINGS)) {
         localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(UHN.Models.DEFAULT_SETTINGS));
       }

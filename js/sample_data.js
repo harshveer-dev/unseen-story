@@ -26,40 +26,58 @@ UHN.SampleData = {
       {
         id: "char_narrator",
         name: "The Narrator",
-        alias: "Unknown",
+        alias: "The Observer",
         age: "18–22",
-        role: "Narrator & Observer",
+        role: "Narrator & Observer (First-person protagonist of WHO AM I?)",
         quote: "Not every kind heart is pure, and not every cold heart is evil.",
         subtitle: "Calm mind. Dangerous thoughts.",
-        personality: "Calm, Observant, Intelligent, Manipulative (sometimes), Emotionally Detached.",
-        likes: "Psychology, Late Night Talks, Solitude, Observing People, Good Music.",
-        dislikes: "Fake People, Drama, Being Controlled.",
-        avatarNote: "He doesn't just talk... he observes.",
+        personality: "Observant, reserved, introspective, mysterious, emotionally detached with sharp psychological curiosity.",
+        physicalAppearance: "Lean athletic build, sharp contemplative facial features, brooding calm expression, observant posture.",
+        faceReference: "Cinematic portrait of a 20-year-old South Asian male, introspective piercing dark amber eyes, sharp jawline, subtle natural stubble, observant expression, moody volumetric side lighting, 8k, photorealistic --ar 9:16 --style raw",
+        hair: "Messy dark wavy hair slightly falling over the forehead.",
+        eyeColor: "Deep dark brown, amber reflective in night lights, highly observant.",
+        skinTone: "Warm olive / medium brown.",
+        heightBuild: "5'10\", lean athletic frame.",
+        wardrobe: "Signature charcoal black oversized heavyweight hoodie, dark slim cargo pants, weathered dark boots.",
+        accessories: "Minimal matte silver band ring on right index finger, dark cord bracelet, worn canvas backpack.",
+        voiceDescription: "Deep resonant baritone, measured cadence (130-135 WPM), low pitch with intentional pauses and intimate whispers.",
+        emotionalRange: "Controlled, calm, masking loneliness behind analytical detachment; rarely panics or raises voice.",
+        continuityRestrictions: "Always fictionalized; never wears bright or neon colors; silver ring always on right index finger; never displays cartoonish villainy.",
+        likes: "Psychology, Late Night Talks, Solitude, Observing People, Lo-fi & Ambient Music.",
+        dislikes: "Fake Smiles, Meaningless Drama, Being Emotionally Controlled.",
         props: [
-          { name: "Eyes", desc: "Deep & Observant, analyzing micro-expressions" },
-          { name: "Rings / Bracelet", desc: "Minimal silver band on right hand" },
-          { name: "Backpack", desc: "Dark worn bag, always with him" },
-          { name: "Laptop", desc: "Coder / Student, glow illuminating dark desk" }
+          { name: "Silver Ring", desc: "Minimal matte silver band on right hand index finger" },
+          { name: "Backpack", desc: "Dark canvas bag slung over one shoulder" },
+          { name: "Laptop", desc: "Illuminating his face in a dark room at 2 AM" }
         ],
-        visualAesthetic: "Dark oversized hoodie, rainy night backdrop, neon reflections on asphalt, quiet coffee cups."
+        visualAesthetic: "Dark oversized hoodie, rainy night backdrop, neon reflections on wet asphalt, quiet coffee cups."
       },
       {
         id: "char_isha",
         name: "Isha",
         alias: "The Girl",
         age: "17–21",
-        role: "The Emotional Anchor",
+        role: "The Emotional Anchor (Central character whose emotional experiences influence the story)",
         quote: "I don't need a perfect person, I just need someone who stays.",
         subtitle: "Soft heart. Strong mind. Hidden pain.",
-        personality: "Emotional, Loyal, Deep Thinker, Sensitive, Stronger Than She Seems.",
-        likes: "Music, Late Night Calls, Deep Conversations, Rain, Aesthetic Things.",
-        dislikes: "Betrayal, Fake People, Being Alone in her grief.",
-        avatarNote: "She feels everything... even what she doesn't say.",
+        personality: "Emotionally expressive, thoughtful, vulnerable at certain moments, but capable of independent decisions and self-respect.",
+        physicalAppearance: "Graceful, expressive face, delicate features, emotional depth, realistic and natural proportions.",
+        faceReference: "Cinematic portrait of a 19-year-old South Asian female, expressive dark brown almond eyes carrying gentle sadness, messy bun with loose soft strands, oversized cream-knit cable sweater, soft golden hour rim light, photorealistic, 8k --ar 9:16 --style raw",
+        hair: "Dark wavy brown hair in a loose messy bun with soft wavy strands framing her face; occasionally open over shoulders.",
+        eyeColor: "Deep dark brown, highly expressive, carrying recent unshed heartbreak.",
+        skinTone: "Medium fair with warm golden undertone.",
+        heightBuild: "5'4\", slender natural build.",
+        wardrobe: "Oversized cream/beige cable-knit sweater, dark denim or warm loungewear, wool socks.",
+        accessories: "Minimal silver pendant necklace with personal significance, wireless headphones on collarbones, lit smartphone.",
+        voiceDescription: "Soft, gentle timbre with subtle hesitation, speaking in sincere conversational Hinglish, emotionally transparent.",
+        emotionalRange: "Heartbroken and cautious after betrayal; opens into warmth with genuine listening; quietly firm when seeking clarity.",
+        continuityRestrictions: "Always fictionalized; minimal pendant necklace always worn; realistic genuine facial expressions; not a helpless caricature.",
+        likes: "Acoustic Music, Late Night Calls, Deep Conversations, Rain, Meaningful Aesthetic Moments.",
+        dislikes: "Betrayal, Insecurity, Fake Reassurance, Being Left Alone with Her Grief.",
         props: [
-          { name: "Eyes", desc: "Expressive, carrying recent unshed heartbreak" },
-          { name: "Hair Style", desc: "Messy bun with loose strands / open over shoulders" },
-          { name: "Phone", desc: "Screen lit at 2 AM with heart emojis and long voice notes" },
-          { name: "Jewellery", desc: "Minimal pendant necklace holding personal memories" }
+          { name: "Pendant Necklace", desc: "Minimal silver pendant necklace holding personal memories" },
+          { name: "Phone", desc: "Screen lit at 2 AM with heart emojis and voice notes" },
+          { name: "Knit Sweater", desc: "Warm oversized beige sweater pulled over her hands" }
         ],
         visualAesthetic: "Warm bedside lamp, oversized knit sweater, foggy window panes, headphone wire."
       }
@@ -663,3 +681,36 @@ You see the face. We question the person behind it.`,
     ]
   }
 };
+
+// Normalize and enrich master series timeline scenes with Phase 4 & 6 properties
+(function normalizeMasterScenes() {
+  const master = UHN.SampleData.MASTER_SERIES;
+  const narratorChar = master.characters[0];
+  const ishaChar = master.characters[1];
+
+  master.episodes.forEach(ep => {
+    (ep.timelinePlan || []).forEach(scene => {
+      if (!scene.characterRef) {
+        const textLow = (scene.visual + " " + scene.text + " " + scene.narrationSync).toLowerCase();
+        if ((textLow.includes("isha") && textLow.includes("narrator")) || textLow.includes("both")) {
+          scene.characterRef = "both";
+        } else if (textLow.includes("isha") || textLow.includes("girl") || textLow.includes("sweater") || textLow.includes("necklace")) {
+          scene.characterRef = "char_isha";
+        } else if (textLow.includes("narrator") || textLow.includes("hoodie") || textLow.includes("ring") || textLow.includes("laptop")) {
+          scene.characterRef = "char_narrator";
+        } else if (textLow.includes("typography") || textLow.includes("emblem") || textLow.includes("black")) {
+          scene.characterRef = "none";
+        } else {
+          scene.characterRef = "char_narrator";
+        }
+      }
+      if (!scene.imagePrompt) {
+        scene.imagePrompt = `Cinematic vertical shot, ${scene.visual}, dark atmospheric lighting, rainy reflections, 8k photorealistic --ar 9:16 --style raw`;
+      }
+      if (!scene.transition) {
+        scene.transition = "Slow cross-dissolve (0.5s)";
+      }
+    });
+  });
+})();
+

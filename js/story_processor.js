@@ -116,23 +116,9 @@ UHN.StoryProcessor = (function() {
       narrationStyle,
       emotionalIntensity,
       endingStyle,
-      sourceStorySummary: rawStory.slice(0, 500) + (rawStory.length > 500 ? "..." : ""),
-      characters: [
-        {
-          id: "char_protagonist",
-          name: "The Narrator",
-          alias: "The Observer",
-          age: "18–24",
-          role: "Narrator & Observer",
-          quote: "Not every kind heart is pure, and not every cold heart is evil.",
-          subtitle: "Calm mind. Dangerous thoughts.",
-          personality: "Observant, introspective, analytical.",
-          props: [
-            { name: "Observation", desc: "Watches social dynamics without speaking" },
-            { name: "Phone/Notebook", desc: "Late night reflections" }
-          ]
-        }
-      ],
+      targetDuration: parseInt(targetDuration) || 45,
+      sourceStorySummary: rawStory, // Complete verbatim source story without silent truncation
+      characters: JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES.characters || [])),
       episodes: generatedEpisodes
     };
 
@@ -396,46 +382,66 @@ UHN.StoryProcessor = (function() {
       {
         timeRange: `00:00–00:0${hEnd}`,
         duration: `${hEnd}s`,
+        characterRef: "char_narrator",
         visual: "Pitch black screen. Sharp high-contrast white typography hits center frame with mobile-safe padding.",
         camera: "Static locked frame",
         text: `${title.toUpperCase()}`,
+        subtitle: `${title.toUpperCase()}`,
+        imagePrompt: `Cinematic typography backdrop, pure charcoal black background, subtle floating dust particles, moody low-key lighting, photorealistic 8k, aspect ratio 9:16 --ar 9:16 --style raw`,
         sfx: "Sub-bass boom (60Hz) impact with clean cutoff",
+        transition: "Hard cut to opening scene",
         narrationSync: "Opening Hook (First 3 seconds grab)"
       },
       {
         timeRange: `00:0${hEnd}–00:${s1End < 10 ? "0" + s1End : s1End}`,
         duration: `${s1End - hEnd}s`,
-        visual: "Cinematic establishing shot: shadowy figure in dark oversized hoodie, subtle rain falling on glass window.",
+        characterRef: "char_narrator",
+        visual: "Cinematic establishing shot: The Narrator in dark oversized hoodie, subtle rain falling on window pane.",
         camera: "Slow lateral tracking dolly (left to right)",
         text: "The Initial Context",
+        subtitle: "Observing without participating",
+        imagePrompt: `Cinematic 9:16 shot of a 20-year-old South Asian male in oversized charcoal hoodie with silver band ring on right hand, looking out rainy cafe window at midnight, neon reflections on asphalt, photorealistic, 8k --ar 9:16 --style raw`,
         sfx: "Gentle vinyl static and distant rain ambiance",
+        transition: "Slow cross dissolve (0.5s)",
         narrationSync: "Core narrative exposition begins"
       },
       {
         timeRange: `00:${s1End < 10 ? "0" + s1End : s1End}–00:${s2End < 10 ? "0" + s2End : s2End}`,
         duration: `${s2End - s1End}s`,
-        visual: "Macro phone screen close-up. Unread notification pulses in dark room, reflections shimmering in eyes.",
+        characterRef: "char_isha",
+        visual: "Intimate close-up: Isha in oversized cream cable-knit sweater holding phone, late night warm bedside lamp.",
         camera: "Slow creeping push-in (depth of field rack)",
         text: "Emotional Turning Point",
+        subtitle: "A stranger listening in the dark",
+        imagePrompt: `Cinematic 9:16 portrait of a 19-year-old South Asian girl in messy hair bun and cream knit sweater, holding glowing smartphone in dark bedroom, warm lamp light, emotional vulnerable expression, photorealistic, 8k --ar 9:16 --style raw`,
         sfx: "Subtle heartbeat tempo rising, low cello swell",
+        transition: "Match cut on phone screen glow",
         narrationSync: "Psychological conflict & character dynamic"
       },
       {
         timeRange: `00:${s2End < 10 ? "0" + s2End : s2End}–00:${s3End < 10 ? "0" + s3End : s3End}`,
         duration: `${s3End - s2End}s`,
-        visual: "High-contrast silhouette against blurred city lights. Cold wind moving dark fabric.",
+        characterRef: "both",
+        visual: "Split emotional reality: High-contrast silhouette of narrator in cold rain contrasted against warm interior.",
         camera: "Low angle profile rotation",
         text: "The Unspoken Reality",
+        subtitle: "Power shifts to whoever cares less",
+        imagePrompt: `Cinematic dual-mood composition, moody low-key lighting, chiaroscuro shadows, rainy city window reflections, deep emotional tension, photorealistic, 8k --ar 9:16 --style raw`,
         sfx: "Riser pitch ascending, sudden drop into dead air",
+        transition: "Sub-bass hit cut to pure black",
         narrationSync: "Climax of the episode's insight"
       },
       {
         timeRange: `00:${s3End < 10 ? "0" + s3End : s3End}–00:${s < 10 ? "0" + s : s}`,
         duration: `${s - s3End}s`,
+        characterRef: "none",
         visual: "Screen cuts to pure charcoal black. Studio emblem and brand tagline emerge in muted silver.",
         camera: "Static with subtle breathing pulse",
         text: "@unseen_hummannature",
+        subtitle: "You see the face. We question the person behind it.",
+        imagePrompt: `Minimalist dark luxury title card, matte silver metallic emblem on textured obsidian background, restrained red rim light, 8k --ar 9:16 --style raw`,
         sfx: "Resonant signature cinematic note + silence",
+        transition: "Fade to black",
         narrationSync: "Final cliffhanger line and call to action"
       }
     ];

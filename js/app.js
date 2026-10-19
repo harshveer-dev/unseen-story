@@ -45,6 +45,7 @@ UHN.App = (function() {
     setupVoiceStudioEvents();
     setupStoryIngestionEvents();
     setupExportEvents();
+    setupGlobalKeyboardShortcuts();
 
     // Listen to storage events
     window.addEventListener("uhn:saved", () => {
@@ -145,7 +146,7 @@ UHN.App = (function() {
   }
 
   /* ==========================================================================
-     EPISODE BIBLE VIEW
+     EPISODE BIBLE VIEW (PHASE 2, 4, 5, 6)
      ========================================================================== */
   function renderEpisodeBible() {
     updateSidebarList();
@@ -239,6 +240,9 @@ UHN.App = (function() {
       };
     }
 
+    // Target Duration Pills (30, 45, 60s)
+    setupTargetDurationPills(ep);
+
     if (scriptArea) {
       scriptArea.value = ep.narrationScript || "";
       scriptArea.oninput = (e) => {
@@ -256,6 +260,9 @@ UHN.App = (function() {
 
     // Hooks
     renderHooksSection(ep);
+
+    // Story Continuity Audit Panel (Phase 5)
+    renderContinuityAudit(ep);
 
     // Psychological Insight
     const insightText = document.getElementById("epInsightText");
@@ -295,7 +302,7 @@ UHN.App = (function() {
       transitionInst.oninput = (e) => { ep.transitionInstructions = e.target.value; autoSave(); };
     }
 
-    // Timeline Table
+    // Timeline Table with Character Attachments (Phase 4 & 6)
     renderTimelineTable(ep);
 
     // Social Media Pack
@@ -306,6 +313,36 @@ UHN.App = (function() {
     if (deleteBtn) {
       deleteBtn.onclick = deleteCurrentEpisode;
     }
+
+    // Production Plan Download button
+    const prodPlanBtn = document.getElementById("btnExportProductionPlanMd");
+    if (prodPlanBtn) {
+      prodPlanBtn.onclick = () => {
+        const md = UHN.ExportCenter.generateVideoProductionPlanMarkdown(ep, activeSeries.title);
+        UHN.ExportCenter.downloadFile(md, `${sanitizeFilename(activeSeries.title)}_Part_${ep.number}_Production_Plan.md`, "text/markdown;charset=utf-8;");
+        showToast("Downloaded Production Plan (.md)");
+      };
+    }
+  }
+
+  function setupTargetDurationPills(ep) {
+    const pillsContainer = document.getElementById("epTargetDurationPills");
+    if (!pillsContainer) return;
+    const target = ep.targetDuration || 45;
+
+    const buttons = pillsContainer.querySelectorAll(".target-pill-btn");
+    buttons.forEach(btn => {
+      const val = parseInt(btn.getAttribute("data-target"));
+      btn.classList.toggle("active", val === target);
+      btn.onclick = () => {
+        ep.targetDuration = val;
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        updateScriptMetrics(ep.narrationScript || "");
+        autoSave();
+        showToast(`Target duration set to ${val}s`);
+      };
+    });
   }
 
   function setupVoiceMarkersToolbar(textarea) {
@@ -330,30 +367,43 @@ UHN.App = (function() {
   function updateScriptMetrics(scriptText) {
     const analysis = UHN.StoryProcessor.analyzeText(scriptText, voiceCurrentWpm);
     const ep = activeSeries.episodes[activeEpisodeIndex];
-    if (ep) {
-      ep.wordCount = analysis.wordCount;
-      ep.estimatedDuration = analysis.estimatedSeconds;
-    }
+    if (!ep) return;
+
+    ep.wordCount = analysis.wordCount;
+    // Never show 0 seconds if words exist
+    ep.estimatedDuration = analysis.wordCount > 0 ? Math.max(1, analysis.estimatedSeconds) : 0;
+    
+    // Timeline duration
+    const timelineTotal = UHN.ReelPlanner.calculateTotalDuration(ep.timelinePlan || []);
 
     const wordEl = document.getElementById("metricWordCount");
     const durEl = document.getElementById("metricDuration");
+    const timelineEl = document.getElementById("metricTimelineTotal");
     const paceEl = document.getElementById("metricPaceIndicator");
-    const wpmEl = document.getElementById("metricWpm");
 
     if (wordEl) wordEl.textContent = analysis.wordCount;
-    if (durEl) durEl.textContent = `~${analysis.estimatedSeconds}s`;
-    if (wpmEl) wpmEl.textContent = `${voiceCurrentWpm} WPM`;
+    if (durEl) durEl.textContent = `~${ep.estimatedDuration}s`;
+    if (timelineEl) timelineEl.textContent = `${timelineTotal}s`;
+
+    // Evaluate pacing against configured target
+    const target = ep.targetDuration || 45;
+    const pacing = UHN.ReelPlanner.evaluatePacing(ep.estimatedDuration, target);
 
     if (paceEl) {
-      if (analysis.estimatedSeconds <= 45) {
-        paceEl.className = "metric-indicator metric-safe";
-        paceEl.innerHTML = `✓ Safe Range (0–45s) • High Retention`;
-      } else if (analysis.estimatedSeconds <= 60) {
-        paceEl.className = "metric-indicator metric-warn";
-        paceEl.innerHTML = `⚠ Moderate (45–60s) • Watch pacing`;
+      paceEl.className = `metric-indicator ${pacing.status === "optimal" ? "metric-safe" : pacing.status === "warning" ? "metric-warn" : "metric-danger"}`;
+      paceEl.textContent = `${pacing.status === "optimal" ? "✓" : "⚠"} Target: ${target}s (~${ep.estimatedDuration}s)`;
+    }
+
+    // Pacing Alert Banner (Warning when too long or too short)
+    const alertBanner = document.getElementById("pacingWarningBanner");
+    const alertText = document.getElementById("pacingWarningText");
+    if (alertBanner && alertText) {
+      if (pacing.status !== "optimal" && analysis.wordCount > 0) {
+        alertBanner.style.display = "flex";
+        alertBanner.className = `pacing-alert ${pacing.status}`;
+        alertText.textContent = pacing.message;
       } else {
-        paceEl.className = "metric-indicator metric-danger";
-        paceEl.innerHTML = `✕ Long (>60s) • Risk of drop-off`;
+        alertBanner.style.display = "none";
       }
     }
   }
@@ -362,12 +412,15 @@ UHN.App = (function() {
     const badge = document.getElementById("safeZoneBadge");
     if (!badge) return;
     const check = UHN.ReelPlanner.checkSafeZone(text);
-    if (check.safe) {
+    if (check.status === "safe") {
       badge.className = "badge badge-published";
       badge.textContent = `Safe (${text.length} chars)`;
+    } else if (check.status === "warning") {
+      badge.className = "badge badge-review";
+      badge.textContent = `Warning: ${text.length} chars`;
     } else {
       badge.className = "badge badge-review";
-      badge.textContent = `Warning: ${text.length} chars (recom. <70)`;
+      badge.textContent = `Danger: ${text.length} chars (recom. <70)`;
     }
   }
 
@@ -410,6 +463,46 @@ UHN.App = (function() {
     });
   }
 
+  /* Story Continuity Audit (Phase 5) */
+  function renderContinuityAudit(ep) {
+    const scorePill = document.getElementById("continuityScorePill");
+    const listContainer = document.getElementById("continuityChecksList");
+    if (!listContainer || !window.UHN.ContinuityChecker) return;
+    listContainer.innerHTML = "";
+
+    const audit = UHN.ContinuityChecker.auditEpisode(activeSeries, activeEpisodeIndex);
+    if (scorePill) {
+      scorePill.textContent = `Health: ${audit.score}%`;
+      scorePill.className = `continuity-score-pill ${audit.status === "optimal" ? "badge-published" : audit.status === "warning" ? "badge-review" : "badge-draft"}`;
+    }
+
+    audit.checks.forEach(check => {
+      const item = document.createElement("div");
+      item.className = "continuity-item";
+      const badgeClass = check.classification.includes("CANON") ? "source-canon" : "creative";
+
+      item.innerHTML = `
+        <div class="continuity-item-top">
+          <strong style="font-size:12px; color:#ffffff">${check.type === "success" ? "✓" : "⚠"} ${escapeHTML(check.title)}</strong>
+          <span class="continuity-classification ${badgeClass}">${check.classification}</span>
+        </div>
+        <div style="font-size:11.5px; color:#a1a1aa">${escapeHTML(check.detail)}</div>
+        <div style="font-size:11px; color:#60a5fa; margin-top:2px"><em>Action: ${escapeHTML(check.suggestion)}</em></div>
+      `;
+      listContainer.appendChild(item);
+    });
+
+    const runSeriesCheckBtn = document.getElementById("btnRunContinuityCheck");
+    if (runSeriesCheckBtn) {
+      runSeriesCheckBtn.onclick = () => {
+        const report = UHN.ExportCenter.generateContinuityReportMarkdown(activeSeries);
+        UHN.ExportCenter.downloadFile(report, `${sanitizeFilename(activeSeries.title)}_Continuity_Report.md`, "text/markdown;charset=utf-8;");
+        showToast("Downloaded Series Continuity Audit Report (.md)");
+      };
+    }
+  }
+
+  /* 9:16 Visual Timeline Table with Character Attachments (Phase 4 & 6) */
   function renderTimelineTable(ep) {
     const tbody = document.getElementById("timelineTableBody");
     if (!tbody) return;
@@ -418,25 +511,88 @@ UHN.App = (function() {
     const timeline = ep.timelinePlan || [];
     timeline.forEach((scene, sIdx) => {
       const tr = document.createElement("tr");
+
+      // Character options
+      const charRef = scene.characterRef || "none";
+      const charOptions = `
+        <select class="form-select char-select-table" style="padding:4px 6px; font-size:11px" data-scene-idx="${sIdx}">
+          <option value="char_narrator" ${charRef === "char_narrator" ? "selected" : ""}>The Narrator</option>
+          <option value="char_isha" ${charRef === "char_isha" ? "selected" : ""}>Isha</option>
+          <option value="both" ${charRef === "both" ? "selected" : ""}>Both</option>
+          <option value="none" ${charRef === "none" ? "selected" : ""}>Atmospheric / None</option>
+        </select>
+      `;
+
       tr.innerHTML = `
-        <td class="timeline-badge-time">${scene.timeRange} (${scene.duration})</td>
-        <td><strong>${escapeHTML(scene.visual)}</strong></td>
+        <td class="timeline-badge-time">
+          ${scene.timeRange}
+          <div style="font-size:10px; color:#71717a">(${scene.duration})</div>
+        </td>
+        <td>${charOptions}</td>
+        <td>
+          <div style="color:#ffffff; font-weight:600; font-size:12px">${escapeHTML(scene.visual)}</div>
+          ${scene.imagePrompt ? `
+            <div style="margin-top:4px">
+              <button class="btn btn-sm btn-ghost copy-prompt-btn" style="font-size:10px; padding:2px 6px" data-prompt="${escapeHTML(scene.imagePrompt)}">
+                📋 Copy Midjourney Prompt
+              </button>
+            </div>
+          ` : ""}
+        </td>
         <td><code>${escapeHTML(scene.camera)}</code></td>
         <td><em>"${escapeHTML(scene.text)}"</em></td>
         <td><span style="color: #60a5fa">${escapeHTML(scene.sfx)}</span></td>
+        <td><span style="font-size:10.5px; color:#a1a1aa">${escapeHTML(scene.transition || "Cut")}</span></td>
         <td><button class="btn btn-sm btn-danger btn-icon" title="Remove Scene" type="button">✕</button></td>
       `;
+
+      // Character select change listener
+      const charSelect = tr.querySelector(".char-select-table");
+      if (charSelect) {
+        charSelect.onchange = (e) => {
+          scene.characterRef = e.target.value;
+          autoSave();
+          showToast(`Assigned character to Scene ${sIdx + 1}`);
+        };
+      }
+
+      // Copy Prompt button
+      const copyBtn = tr.querySelector(".copy-prompt-btn");
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          const prompt = copyBtn.getAttribute("data-prompt");
+          navigator.clipboard.writeText(prompt).then(() => {
+            showToast("Copied Midjourney Prompt!");
+          });
+        };
+      }
+
+      // Delete scene
       const delBtn = tr.querySelector(".btn-danger");
       if (delBtn) {
         delBtn.onclick = () => {
           ep.timelinePlan.splice(sIdx, 1);
           ep.timelinePlan = UHN.ReelPlanner.recalculateTimelines(ep.timelinePlan);
           renderTimelineTable(ep);
+          updateScriptMetrics(ep.narrationScript || "");
           autoSave();
         };
       }
       tbody.appendChild(tr);
     });
+
+    // Auto-Sync Timeline button (Phase 2)
+    const syncBtn = document.getElementById("btnSyncTimeline");
+    if (syncBtn) {
+      syncBtn.onclick = () => {
+        const targetSec = ep.estimatedDuration || ep.targetDuration || 45;
+        ep.timelinePlan = UHN.ReelPlanner.syncTimelineToTarget(ep.timelinePlan || [], targetSec);
+        renderTimelineTable(ep);
+        updateScriptMetrics(ep.narrationScript || "");
+        autoSave();
+        showToast(`Auto-synchronized timeline scenes to ~${targetSec}s!`);
+      };
+    }
 
     const addSceneBtn = document.getElementById("btnAddTimelineScene");
     if (addSceneBtn) {
@@ -445,14 +601,19 @@ UHN.App = (function() {
         ep.timelinePlan.push({
           timeRange: "00:00–00:05",
           duration: "5s",
+          characterRef: "char_narrator",
           visual: "New cinematic scene visual",
           camera: "Slow forward push",
           text: "KEY PSYCHOLOGICAL QUESTION",
+          subtitle: "KEY PSYCHOLOGICAL QUESTION",
+          imagePrompt: "Cinematic portrait in 9:16 aspect ratio, moody low-key lighting, 8k --ar 9:16 --style raw",
           sfx: "Subtle heartbeat",
+          transition: "Clean cut",
           narrationSync: "Synced with narration"
         });
         ep.timelinePlan = UHN.ReelPlanner.recalculateTimelines(ep.timelinePlan);
         renderTimelineTable(ep);
+        updateScriptMetrics(ep.narrationScript || "");
         autoSave();
         showToast("Added new timeline scene!");
       };
@@ -536,9 +697,9 @@ UHN.App = (function() {
         { category: "unexpected_observation", text: "Insaan aksar wahi kho deta hai jise woh sabse zyada chupata hai." }
       ],
       timelinePlan: [
-        { timeRange: "00:00–00:05", duration: "5s", visual: "Macro extreme close up of reflective eyes", camera: "Slow push in", text: `PART ${epNum}: SHADOW ENCOUNTER`, sfx: "Subtle sub-bass", narrationSync: "Opening hook spoken" },
-        { timeRange: "00:05–00:20", duration: "15s", visual: "Walking alone through rainy city lights", camera: "Tracking over shoulder", text: "OBSERVING HUMAN MOTIVE", sfx: "Rain ambience", narrationSync: "Main story narration" },
-        { timeRange: "00:20–00:45", duration: "25s", visual: "Silhouette standing in front of mirror", camera: "Static tilt up", text: "THE UNSEEN TRUTH", sfx: "Deep pulse drone", narrationSync: "Concluding reflection" }
+        { timeRange: "00:00–00:05", duration: "5s", characterRef: "char_narrator", visual: "Macro extreme close up of reflective eyes", camera: "Slow push in", text: `PART ${epNum}: SHADOW ENCOUNTER`, sfx: "Subtle sub-bass", transition: "Cut to black", narrationSync: "Opening hook spoken" },
+        { timeRange: "00:05–00:20", duration: "15s", characterRef: "char_narrator", visual: "Walking alone through rainy city lights", camera: "Tracking over shoulder", text: "OBSERVING HUMAN MOTIVE", sfx: "Rain ambience", transition: "Slow cross dissolve", narrationSync: "Main story narration" },
+        { timeRange: "00:20–00:45", duration: "25s", characterRef: "char_isha", visual: "Silhouette standing in front of mirror", camera: "Static tilt up", text: "THE UNSEEN TRUTH", sfx: "Deep pulse drone", transition: "Fade out", narrationSync: "Concluding reflection" }
       ]
     };
 
@@ -570,7 +731,7 @@ UHN.App = (function() {
   }
 
   /* ==========================================================================
-     9:16 REEL SIMULATOR CONTROLLER
+     9:16 REEL SIMULATOR CONTROLLER (PHASE 3: HONEST SIMULATOR)
      ========================================================================== */
   function renderSimulator() {
     if (!activeSeries || !activeSeries.episodes || !activeSeries.episodes[activeEpisodeIndex]) return;
@@ -591,7 +752,7 @@ UHN.App = (function() {
     if (igUsername) igUsername.textContent = UHN.Models.BRAND.handle;
     if (igCaption) igCaption.textContent = ep.instagramCaptions ? ep.instagramCaptions.short : ep.openingHook;
 
-    simDuration = ep.estimatedDuration || ep.targetDuration || 45;
+    simDuration = UHN.ReelPlanner.calculateTotalDuration(ep.timelinePlan || []) || ep.estimatedDuration || ep.targetDuration || 45;
     const maxDurationEl = document.getElementById("simMaxDuration");
     if (maxDurationEl) maxDurationEl.textContent = formatSec(simDuration);
 
@@ -601,22 +762,34 @@ UHN.App = (function() {
       scrubber.value = simCurrentTime;
     }
 
-    // Render Scene List
+    // Render Scene List with Active Scene Highlight capability
     if (timelineList) {
       timelineList.innerHTML = "";
       (ep.timelinePlan || []).forEach((scene, idx) => {
         const item = document.createElement("div");
-        item.className = "card";
-        item.style.padding = "12px 16px";
-        item.style.marginBottom = "8px";
+        item.className = "sim-scene-item";
+        item.id = `simSceneItem_${idx}`;
+
+        const charName = scene.characterRef === "char_narrator" ? "The Narrator" : scene.characterRef === "char_isha" ? "Isha" : scene.characterRef === "both" ? "Both" : "Atmospheric";
+
         item.innerHTML = `
           <div style="display:flex; justify-content:space-between; margin-bottom:4px">
             <span class="timeline-badge-time">${scene.timeRange} (${scene.duration})</span>
             <span style="font-size:11px; color:#60a5fa">${escapeHTML(scene.camera)}</span>
           </div>
           <div style="font-size:12px; color:#ffffff; font-weight:600">${escapeHTML(scene.visual)}</div>
-          <div style="font-size:11px; color:#a1a1aa; margin-top:2px"><em>Overlay: "${escapeHTML(scene.text)}"</em></div>
+          <div style="font-size:11px; color:#a1a1aa; margin-top:2px">
+            <em>Character: ${charName} • Overlay: "${escapeHTML(scene.text)}"</em>
+          </div>
         `;
+
+        item.onclick = () => {
+          // Jump to this scene's start time
+          const startSec = parseInt(scene.timeRange.split("–")[0].split(":")[1]) || 0;
+          simCurrentTime = startSec;
+          updateSimulatorFrame(simCurrentTime);
+        };
+
         timelineList.appendChild(item);
       });
     }
@@ -681,15 +854,38 @@ UHN.App = (function() {
         if (!ep) return;
         if (UHN.VoiceStudio.isPlaying()) {
           UHN.VoiceStudio.stopPreview();
-          voicePreviewBtn.innerHTML = `<span>▶ Listen to Narration Audio</span>`;
+          voicePreviewBtn.innerHTML = `<span>▶ Narration Audio (Demo)</span>`;
         } else {
-          voicePreviewBtn.innerHTML = `<span>⏹ Stop Narration Audio</span>`;
+          voicePreviewBtn.innerHTML = `<span>⏹ Stop Audio</span>`;
           UHN.VoiceStudio.playPreview(ep.narrationScript, voiceCurrentWpm, null, () => {
-            voicePreviewBtn.innerHTML = `<span>▶ Listen to Narration Audio</span>`;
+            voicePreviewBtn.innerHTML = `<span>▶ Narration Audio (Demo)</span>`;
           });
         }
       };
     }
+  }
+
+  function setupGlobalKeyboardShortcuts() {
+    window.addEventListener("keydown", (e) => {
+      // Spacebar toggles play/pause in simulator if not typing in an input
+      if (e.code === "Space" && activeTab === "simulator" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        if (simIsPlaying) pauseSimulator();
+        else startSimulator();
+      }
+      // Arrow keys scrub
+      if (activeTab === "simulator" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          simCurrentTime = Math.max(0, simCurrentTime - 1);
+          updateSimulatorFrame(simCurrentTime);
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          simCurrentTime = Math.min(simDuration, simCurrentTime + 1);
+          updateSimulatorFrame(simCurrentTime);
+        }
+      }
+    });
   }
 
   function startSimulator() {
@@ -727,13 +923,16 @@ UHN.App = (function() {
     // Determine current scene from timelinePlan
     const timeline = ep.timelinePlan || [];
     let curScene = timeline[0] || null;
+    let curSceneIdx = 0;
     let accumulated = 0;
 
-    for (let scene of timeline) {
+    for (let i = 0; i < timeline.length; i++) {
+      const scene = timeline[i];
       const durMatch = (scene.duration || "5s").match(/\d+/);
       const dur = durMatch ? parseInt(durMatch[0]) : 5;
       if (timeInSec >= accumulated && timeInSec < accumulated + dur) {
         curScene = scene;
+        curSceneIdx = i;
         break;
       }
       accumulated += dur;
@@ -747,13 +946,23 @@ UHN.App = (function() {
       if (overlayText) overlayText.textContent = curScene.text || ep.onScreenText;
       if (subtitleBar) subtitleBar.textContent = `"${curScene.narrationSync || ep.openingHook}"`;
       if (sceneVisualDesc) {
-        sceneVisualDesc.textContent = `Camera: ${curScene.camera} • Visual: ${curScene.visual} • SFX: ${curScene.sfx}`;
+        const charName = curScene.characterRef === "char_narrator" ? "The Narrator" : curScene.characterRef === "char_isha" ? "Isha" : curScene.characterRef === "both" ? "Both" : "Atmospheric";
+        sceneVisualDesc.textContent = `Character: ${charName} • Camera: ${curScene.camera} • Visual: ${curScene.visual} • SFX: ${curScene.sfx}`;
       }
+
+      // Highlight active scene card in scene list (Phase 3 Requirement)
+      document.querySelectorAll(".sim-scene-item").forEach((item, idx) => {
+        const isActive = idx === curSceneIdx;
+        item.classList.toggle("active-scene", isActive);
+        if (isActive && simIsPlaying) {
+          item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
     }
   }
 
   /* ==========================================================================
-     VOICE-OVER STUDIO CONTROLLER
+     VOICE-OVER STUDIO CONTROLLER (PHASE 7)
      ========================================================================== */
   function renderVoiceStudio() {
     if (!activeSeries || !activeSeries.episodes || !activeSeries.episodes[activeEpisodeIndex]) return;
@@ -761,7 +970,7 @@ UHN.App = (function() {
 
     const titleEl = document.getElementById("voiceStudioEpTitle");
     if (titleEl) {
-      titleEl.textContent = `PART ${ep.number < 10 ? "0" + ep.number : ep.number}: ${ep.title}`;
+      titleEl.textContent = `PART ${ep.number < 10 ? "0" + ep.number : ep.number}: ${ep.title} (~${ep.estimatedDuration}s at ${voiceCurrentWpm} WPM)`;
     }
 
     const teleprompterBox = document.getElementById("teleprompterContent");
@@ -812,7 +1021,6 @@ UHN.App = (function() {
           ep.narrationScript,
           voiceCurrentWpm,
           (charIndex, fullCleanText) => {
-            // Find approximately matching sentence
             const spokenBlocks = voiceSentences.filter(b => b.type === "spoken");
             let accumulatedChars = 0;
             for (let i = 0; i < spokenBlocks.length; i++) {
@@ -1013,7 +1221,7 @@ UHN.App = (function() {
   }
 
   /* ==========================================================================
-     CHARACTER BIBLE & MOODBOARD VIEW
+     CHARACTER BIBLE & MOODBOARD VIEW (PHASE 4: 14 PERSISTENT FIELDS)
      ========================================================================== */
   function renderCharacterBible() {
     const grid = document.getElementById("charactersListGrid");
@@ -1034,24 +1242,60 @@ UHN.App = (function() {
           <div class="character-avatar">${char.name.charAt(0)}</div>
           <div class="character-name-block">
             <span class="character-name">${escapeHTML(char.name)}</span>
-            <span class="character-role-tag">${escapeHTML(char.role || "Character")} • ${char.age || ""}</span>
+            <span class="character-role-tag">${escapeHTML(char.role || "Character")}</span>
           </div>
         </div>
+
         <div class="character-quote">"${escapeHTML(char.quote || "")}"</div>
-        <div style="font-size:12.5px; color:#d4d4d8">
-          <strong>Personality:</strong> ${escapeHTML(char.personality || "Introspective and complex.")}
+
+        <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#d4d4d8">
+          <div><strong>Physical Appearance:</strong> ${escapeHTML(char.physicalAppearance || "Contemplative features, realistic proportions.")}</div>
+          <div><strong>Hair & Eyes:</strong> ${escapeHTML(char.hair || "Dark wavy hair")} | ${escapeHTML(char.eyeColor || "Dark brown")}</div>
+          <div><strong>Skin Tone & Build:</strong> ${escapeHTML(char.skinTone || "Warm olive")} | ${escapeHTML(char.heightBuild || "5'10\", lean")}</div>
+          <div><strong>Signature Wardrobe:</strong> ${escapeHTML(char.wardrobe || "Dark oversized hoodie")}</div>
+          <div><strong>Key Accessories:</strong> ${escapeHTML(char.accessories || "Minimal silver ring")}</div>
+          <div><strong>Voice Cadence:</strong> ${escapeHTML(char.voiceDescription || "Deep measured baritone")}</div>
+          <div><strong>Personality:</strong> ${escapeHTML(char.personality || "Introspective and complex.")}</div>
+          <div><strong>Emotional Range:</strong> ${escapeHTML(char.emotionalRange || "Controlled, masked vulnerability.")}</div>
+          <div style="color:#fca5a5"><strong>Continuity Restrictions:</strong> ${escapeHTML(char.continuityRestrictions || "Always fictionalized; never breaks wardrobe continuity.")}</div>
         </div>
-        <div style="font-size:12px; color:#a1a1aa">
-          <strong>Visual Aesthetic:</strong> ${escapeHTML(char.visualAesthetic || "Cinematic moody backdrop")}
+
+        <div style="margin-top:6px">
+          <label class="form-label">AI Generation Prompt (Midjourney / SDXL):</label>
+          <div class="copy-box" style="font-size:11px; margin-bottom:6px">
+            <button class="btn btn-sm btn-secondary copy-btn-absolute copy-char-prompt-btn" type="button">Copy Prompt</button>
+            <div class="char-prompt-text mono">${escapeHTML(char.faceReference || "")}</div>
+          </div>
         </div>
+
         <div class="props-list">${propsHtml}</div>
       `;
+
+      // Copy Prompt Button
+      const copyPromptBtn = card.querySelector(".copy-char-prompt-btn");
+      if (copyPromptBtn) {
+        copyPromptBtn.onclick = () => {
+          navigator.clipboard.writeText(char.faceReference || "").then(() => {
+            showToast(`Copied ${char.name}'s AI Generation Prompt!`);
+          });
+        };
+      }
+
       grid.appendChild(card);
     });
+
+    const exportCharBtn = document.getElementById("btnExportCharBibleMd");
+    if (exportCharBtn) {
+      exportCharBtn.onclick = () => {
+        const md = UHN.ExportCenter.generateCharacterBibleMarkdown(activeSeries.characters, UHN.Models.BRAND);
+        UHN.ExportCenter.downloadFile(md, `${sanitizeFilename(activeSeries.title)}_Character_Bible.md`, "text/markdown;charset=utf-8;");
+        showToast("Downloaded Character Bible (.md)");
+      };
+    }
   }
 
   /* ==========================================================================
-     EXPORT CENTER CONTROLLER
+     EXPORT CENTER CONTROLLER (PHASE 8)
      ========================================================================== */
   function renderExportCenter() {
     // Handlers setup in setupExportEvents
@@ -1073,35 +1317,57 @@ UHN.App = (function() {
       showToast(`Downloaded Part ${ep.number} Plan (.md)`);
     });
 
-    // 3. Teleprompter Scripts (.txt)
+    // 3. Character Bible (.md)
+    setupDownloadBtn("btnExportCharBibleMd2", () => {
+      const md = UHN.ExportCenter.generateCharacterBibleMarkdown(activeSeries.characters, UHN.Models.BRAND);
+      UHN.ExportCenter.downloadFile(md, `${sanitizeFilename(activeSeries.title)}_Character_Bible.md`, "text/markdown;charset=utf-8;");
+      showToast("Downloaded Character Bible (.md)");
+    });
+
+    // 4. Story Continuity Report (.md)
+    setupDownloadBtn("btnExportContinuityMd", () => {
+      const md = UHN.ExportCenter.generateContinuityReportMarkdown(activeSeries);
+      UHN.ExportCenter.downloadFile(md, `${sanitizeFilename(activeSeries.title)}_Continuity_Report.md`, "text/markdown;charset=utf-8;");
+      showToast("Downloaded Story Continuity Report (.md)");
+    });
+
+    // 5. Video Production Plan (.md)
+    setupDownloadBtn("btnExportProdPlanMd", () => {
+      const ep = activeSeries.episodes[activeEpisodeIndex];
+      const md = UHN.ExportCenter.generateVideoProductionPlanMarkdown(ep, activeSeries.title);
+      UHN.ExportCenter.downloadFile(md, `${sanitizeFilename(activeSeries.title)}_Part_${ep.number}_Video_Plan.md`, "text/markdown;charset=utf-8;");
+      showToast("Downloaded Video Production Plan (.md)");
+    });
+
+    // 6. Teleprompter Scripts (.txt)
     setupDownloadBtn("btnExportScriptsTxt", () => {
       const txt = UHN.ExportCenter.generateAllScriptsText(activeSeries);
       UHN.ExportCenter.downloadFile(txt, `${sanitizeFilename(activeSeries.title)}_Teleprompter_Scripts.txt`);
       showToast("Downloaded Narration Scripts (.txt)");
     });
 
-    // 4. Hook Database (.txt)
+    // 7. Hook Database (.txt)
     setupDownloadBtn("btnExportHooksTxt", () => {
       const txt = UHN.ExportCenter.generateAllHooksText(activeSeries);
       UHN.ExportCenter.downloadFile(txt, `${sanitizeFilename(activeSeries.title)}_Hook_Database.txt`);
       showToast("Downloaded Hook Database (.txt)");
     });
 
-    // 5. Instagram Caption Pack (.txt)
+    // 8. Instagram Caption Pack (.txt)
     setupDownloadBtn("btnExportCaptionsTxt", () => {
       const txt = UHN.ExportCenter.generateCaptionsText(activeSeries);
       UHN.ExportCenter.downloadFile(txt, `${sanitizeFilename(activeSeries.title)}_Instagram_Captions.txt`);
       showToast("Downloaded Caption Pack (.txt)");
     });
 
-    // 6. Director's Shot List (.txt)
+    // 9. Director's Shot List (.txt)
     setupDownloadBtn("btnExportVisualsTxt", () => {
       const txt = UHN.ExportCenter.generateVisualPlansText(activeSeries);
       UHN.ExportCenter.downloadFile(txt, `${sanitizeFilename(activeSeries.title)}_Visual_Shot_List.txt`);
       showToast("Downloaded Shot List (.txt)");
     });
 
-    // 7. Full JSON Backup
+    // 10. Full JSON Backup
     setupDownloadBtn("btnExportBackupJson", () => {
       const json = UHN.Storage.exportBackupJSON();
       UHN.ExportCenter.downloadFile(json, `UHN_Dark_Studio_Backup_${new Date().toISOString().slice(0, 10)}.json`, "application/json;charset=utf-8;");
@@ -1214,15 +1480,7 @@ UHN.App = (function() {
           language: "Hinglish / Hindi",
           status: "draft",
           lastModified: new Date().toISOString(),
-          characters: [
-            {
-              id: "char_narrator",
-              name: "The Narrator",
-              role: "Narrator & Observer",
-              quote: "Not every kind heart is pure.",
-              personality: "Calm, observant, calculating."
-            }
-          ],
+          characters: JSON.parse(JSON.stringify(UHN.SampleData.MASTER_SERIES.characters || [])),
           episodes: []
         };
         // Add Part 1
@@ -1255,7 +1513,7 @@ UHN.App = (function() {
             { category: "psychological_mystery", text: "Kyun hota hai ki sabse gehri baatein sirf anjaano se hoti hain?" }
           ],
           timelinePlan: [
-            { timeRange: "00:00–00:10", duration: "10s", visual: "Rain on cafe window", camera: "Macro focus pull", text: "PART 01: THE FIRST GLIMPSE", sfx: "Rain sound", narrationSync: "First line" }
+            { timeRange: "00:00–00:10", duration: "10s", characterRef: "char_narrator", visual: "Rain on cafe window", camera: "Macro focus pull", text: "PART 01: THE FIRST GLIMPSE", sfx: "Rain sound", transition: "Fade to black", narrationSync: "First line" }
           ]
         });
 

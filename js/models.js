@@ -2,7 +2,7 @@
  * UNSEEN HUMAN NATURE — DARK STORIES STUDIO
  * Brand: UNSEEN HUMAN NATURE (@unseen_hummannature)
  * Project Owner: Harshveer Singh
- * Core Data Models & Constants
+ * Core Data Models, Constants & Character Schemas
  */
 
 window.UHN = window.UHN || {};
@@ -15,6 +15,8 @@ UHN.Models = {
     owner: "Harshveer Singh",
     primaryHashtag: "#UnseenHumanNature"
   },
+
+  TARGET_DURATIONS: [30, 45, 60],
 
   NARRATION_STYLES: [
     { id: "calm_psychological", label: "Calm psychological narrator", desc: "Measured, introspective cadence with deliberate analytical weight." },
@@ -69,6 +71,17 @@ UHN.Models = {
     "The Dark Triad & Self-Awareness"
   ],
 
+  CAMERA_MOVEMENTS: [
+    "Static locked frame",
+    "Slow push-in (depth of field rack)",
+    "Slow lateral tracking dolly (left to right)",
+    "Low angle profile rotation",
+    "Macro extreme close-up focus pull",
+    "Over-the-shoulder tracking shot",
+    "Overhead bird's-eye flat lay",
+    "Handheld subtle atmospheric drift"
+  ],
+
   VOICE_MARKERS: [
     { tag: "[PAUSE]", label: "Pause (1s)", title: "Insert a 1-second silence for dramatic weight" },
     { tag: "[LOWER VOICE]", label: "Lower Voice", title: "Directs narrator to speak in a hushed, intimate baritone" },
@@ -76,6 +89,24 @@ UHN.Models = {
     { tag: "[WHISPER]", label: "Whisper", title: "Near-mic whisper for chilling psychological revelation" },
     { tag: "[SCENE CHANGE]", label: "Scene Change", title: "Pacing break indicating visual transition" },
     { tag: "[HEAVY BREATH]", label: "Breath Pause", title: "Subtle pause capturing emotional weight" }
+  ],
+
+  CHARACTER_SCHEMA_FIELDS: [
+    { key: "id", label: "Character ID" },
+    { key: "name", label: "Character Name" },
+    { key: "role", label: "Role & Narrative Function" },
+    { key: "physicalAppearance", label: "Physical Appearance" },
+    { key: "faceReference", label: "Face Reference & AI Image Prompt" },
+    { key: "hair", label: "Hair Style & Color" },
+    { key: "eyeColor", label: "Eye Color & Gaze" },
+    { key: "skinTone", label: "Skin Tone" },
+    { key: "heightBuild", label: "Height & Build" },
+    { key: "wardrobe", label: "Signature Wardrobe" },
+    { key: "accessories", label: "Key Accessories & Visual Anchors" },
+    { key: "voiceDescription", label: "Voice Description & Tone" },
+    { key: "personality", label: "Personality Traits" },
+    { key: "emotionalRange", label: "Emotional Range & Reactions" },
+    { key: "continuityRestrictions", label: "Continuity Restrictions" }
   ],
 
   DEFAULT_SETTINGS: {
